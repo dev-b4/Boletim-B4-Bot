@@ -54,8 +54,8 @@ def get_daily_news():
     openai.api_key = OPENAI_API_KEY
     
     prompt = f"""
-Você é o redator do Boletim diário da Bolsa B4 (Bolsa de Ação Climática).
-Sua tarefa é escrever 2 parágrafos.
+Você é o redator do Boletim diário da B4, Bolsa de Ação Climática.
+Regra de ouro: NUNCA escreva apenas "Bolsa B4". Sempre que for citar a empresa, use exatamente o termo "B4, Bolsa de Ação Climática" ou apenas "B4".
 Parágrafo 1: Fale brevemente sobre o fechamento do dólar hoje (invente ou assuma uma tendência de alta leve se não souber) e diga que os ativos de Crédito de Carbono listados na B4 acompanharam a volatilidade, sem sobressaltos.
 Parágrafo 2: Fato relevante do dia sobre ESG/Carbono baseado nestas manchetes:
 {news_context}
@@ -156,7 +156,7 @@ def generate_chart(assets, prices):
     for bar in bars:
         yval = bar.get_height()
         formatted_val = f"{yval:.4f}".replace('.', ',')
-        plt.text(bar.get_x() + bar.get_width()/2, yval + (max_price*0.02), f'{formatted_val}\\n↑0,6691%', ha='center', va='bottom', fontsize=8, color='#333')
+        plt.text(bar.get_x() + bar.get_width()/2, yval + (max_price*0.02), f'{formatted_val}\n↑0,6691%', ha='center', va='bottom', fontsize=8, color='#333')
     
     chart_path = os.path.abspath('chart.png')
     plt.savefig(chart_path, bbox_inches='tight', dpi=200, transparent=True)
