@@ -139,13 +139,14 @@ async def get_prices():
 # ==========================================
 def generate_chart(assets, prices):
     print("Gerando gráfico...")
-    plt.figure(figsize=(8, 3.5))
-    bars = plt.bar(assets, prices, color='#8B5CF6', width=0.3)
-    plt.title('Cotação Diária de Fechamento', fontsize=14, color='#444', pad=20)
+    # Aumentei a largura de 8 para 10 para as barras respirarem
+    plt.figure(figsize=(10, 4))
+    bars = plt.bar(assets, prices, color='#8B5CF6', width=0.4)
+    plt.title('Cotação Diária de Fechamento', fontsize=16, color='#444', pad=20)
     plt.ylabel('R$', color='#666')
     
     max_price = max(prices) if prices else 100
-    plt.ylim(0, max_price * 1.2)
+    plt.ylim(0, max_price * 1.25)
     
     plt.grid(axis='y', linestyle='-', alpha=0.3, color='#999')
     plt.gca().spines['top'].set_visible(False)
@@ -156,12 +157,15 @@ def generate_chart(assets, prices):
     for bar in bars:
         yval = bar.get_height()
         formatted_val = f"{yval:.4f}".replace('.', ',')
-        plt.text(bar.get_x() + bar.get_width()/2, yval + (max_price*0.02), f'{formatted_val}\n↑0,6691%', ha='center', va='bottom', fontsize=8, color='#333')
+        # Pula linha perfeitamente no Python e aplica no gráfico
+        label_text = formatted_val + "\n↑0,6691%"
+        plt.text(bar.get_x() + bar.get_width()/2, yval + (max_price*0.02), label_text, ha='center', va='bottom', fontsize=9, color='#333')
     
     chart_path = os.path.abspath('chart.png')
     plt.savefig(chart_path, bbox_inches='tight', dpi=200, transparent=True)
     plt.close()
     return chart_path
+
 
 async def generate_pdf(news_text, chart_path):
     print("Gerando HTML e PDF...")
