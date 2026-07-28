@@ -77,15 +77,15 @@ Escreva de forma profissional, direta e jornalística. Não use saudações.
         title_resp = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": title_prompt}],
-            temperature=0.7
+            temperature=0.3
         )
-        news_title = title_resp.choices[0].message.content.strip()
-    except Exception as e:
-        print("Erro na OpenAI:", e)
-        news_text = "O mercado de Crédito de Carbono operou com estabilidade hoje. Os ativos listados na plataforma B4 acompanharam o fechamento sem novos destaques de volatilidade."
-        news_title = "Mercado ESG opera com estabilidade"
+        news_title = title_resp.choices[0].message.content.strip().replace('"', '')
+        news_link = top_news.link if top_news else ""
         
-    return news_title, news_text
+        return news_title, news_text, news_link
+    except Exception as e:
+        print(f"Erro no OpenAI: {e}")
+        return "Boletim Cotação Ativos Sustentáveis", "O mercado de Crédito de Carbono operou com estabilidade hoje. Os ativos listados na plataforma B4 acompanharam o fechamento sem novos destaques de volatilidade.", ""
 
 # ==========================================
 # 2. COTAÇÕES (API DA B4 + FALLBACK DO BCB)
@@ -167,7 +167,7 @@ def generate_chart(assets, prices):
     plt.close()
     return chart_path
 
-async def generate_pdf(news_text, chart_path):
+async def generate_pdf(news_text, chart_path, news_link=""):
     print("Gerando HTML e PDF...")
     date_str = datetime.datetime.now().strftime("%d/%m/%Y")
     
@@ -177,10 +177,10 @@ async def generate_pdf(news_text, chart_path):
     asset_list = [
         {"name": "B4TRII", "link": "https://polygonscan.com/token/0xDe2FAe49cFECAA7c011f85B04C318Ad771CE4491"},
         {"name": "BFTIII", "link": "https://polygonscan.com/token/0x9F727a1350b11f6C0855ddf718ae8Bc058a5342e"},
-        {"name": "ARCIBA", "link": "https://polygonscan.com/token/0xc04c400A561BEfC37a8d4CFde7527D2F3c2928F7"},
-        {"name": "APNKAA", "link": "https://polygonscan.com/token/0xD5660178319a151f780D3aBCc82c1d12D2dc75fF"},
-        {"name": "DWM", "link": "https://polygonscan.com/token/0x063af83a39e0e42111799d7d0ec9d8af7e3e75a2"},
-        {"name": "OWBN", "link": "https://polygonscan.com/token/0x0938d6d82f7de771b1f0501891a88f9c9311d69e"}
+        {"name": "ARCIBA", "link": "https://polygonscan.com/token/0xE3D6dBD7F5fE736655bcbf2D71a74dCCbbbb7d48"},
+        {"name": "APNKAA", "link": "https://polygonscan.com/token/0xFcf0B7a508b5e29bb35D8A3e477618D80F3398D5"},
+        {"name": "DWM", "link": "https://polygonscan.com/token/0x68551E5C6dBe0249219b16B47fE57D2e24029272"},
+        {"name": "OWBN", "link": "https://polygonscan.com/token/0xd8A4F13812d6a50e1DBA7eFdbE8FddD7DFf4F090"}
     ]
     
     bg_path = os.path.abspath('bg.png')
@@ -188,10 +188,10 @@ async def generate_pdf(news_text, chart_path):
     html_content = template.render(
         date=date_str,
         news_text=news_text,
+        news_link=news_link,
         chart_path=f"file://{chart_path}",
-        bg_path=bg_path,
-        assets=asset_list,
-        source_link="https://b4.capital"
+        bg_path=f"file://{bg_path}",
+        assets=asset_list
     )
     
     html_path = os.path.abspath('rendered.html')
@@ -275,12 +275,17 @@ def post_wordpress(news_title, news_text, pdf_filename, chart_filename):
 
 async def main():
     print("--- INICIANDO ROBÔ BOLETIM B4 ---")
-    news_title, news_text = get_daily_news()
+    news_title, news_text, news_link = get_daily_news()
+    
+    print("\n[RESUMO DO BOLETIM]")
+    print(f"TÍTULO: {news_title}")
+    print(f"TEXTO: {news_text}\n")
+    print(f"FONTE: {news_link}\n")
     
     prices = await get_prices()
     chart_path = generate_chart(ASSETS, prices)
     
-    pdf_filename = await generate_pdf(news_text, chart_path)
+    pdf_filename = await generate_pdf(news_text, chart_path, news_link)
     
     chart_filename = f"chart_{datetime.datetime.now().strftime('%d_%m_%Y_%H%M%S')}.png"
     # Rename chart to include date for upload

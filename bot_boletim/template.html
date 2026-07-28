@@ -101,6 +101,12 @@
         </div>
 
         <div class="assets-list">
+            <p><strong>Fontes de Dados:</strong><br>
+            Bolsa B4, Banco Central do Brasil</p>
+            {% if news_link %}
+            <p><strong>Fonte da Notícia:</strong><br>
+            <a href="{{ news_link }}" style="color: #666; word-break: break-all; font-size: 10px;">{{ news_link }}</a></p>
+            {% endif %}
             <p><strong>Registro do volume negociado:</strong></p>
             {% for asset in assets %}
             <p><strong>{{ asset.name }}</strong> <br><a href="{{ asset.link }}" style="color: blue; text-decoration: none;">{{ asset.link }}</a></p>
