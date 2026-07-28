@@ -56,6 +56,8 @@ def get_daily_news():
     prompt = f"""
 Você é o redator do Boletim diário da B4, Bolsa de Ação Climática.
 Regra de ouro: NUNCA escreva apenas "Bolsa B4". Sempre que for citar a empresa, use exatamente o termo "B4, Bolsa de Ação Climática" ou apenas "B4".
+
+Sua tarefa é escrever 2 parágrafos.
 Parágrafo 1: Fale brevemente sobre o fechamento do dólar hoje (invente ou assuma uma tendência de alta leve se não souber) e diga que os ativos de Crédito de Carbono listados na B4 acompanharam a volatilidade, sem sobressaltos.
 Parágrafo 2: Fato relevante do dia sobre ESG/Carbono baseado nestas manchetes:
 {news_context}
@@ -69,7 +71,8 @@ Escreva de forma profissional, direta e jornalística. Não use saudações.
             temperature=0.7
         )
         news_text = response.choices[0].message.content.strip()
-        news_text = news_text.replace("Bolsa B4", "B4, Bolsa de Ação Climática")        
+        news_text = news_text.replace("Bolsa B4", "B4, Bolsa de Ação Climática")
+        
         title_prompt = f"Crie apenas o título principal (sem a data) para esta notícia em até 10 palavras. Notícia: {news_text}"
         title_resp = openai.ChatCompletion.create(
             model="gpt-4o-mini",
@@ -139,7 +142,6 @@ async def get_prices():
 # ==========================================
 def generate_chart(assets, prices):
     print("Gerando gráfico...")
-    # Aumentei a largura de 8 para 10 para as barras respirarem
     plt.figure(figsize=(10, 4))
     bars = plt.bar(assets, prices, color='#8B5CF6', width=0.4)
     plt.title('Cotação Diária de Fechamento', fontsize=16, color='#444', pad=20)
@@ -157,7 +159,6 @@ def generate_chart(assets, prices):
     for bar in bars:
         yval = bar.get_height()
         formatted_val = f"{yval:.4f}".replace('.', ',')
-        # Pula linha perfeitamente no Python e aplica no gráfico
         label_text = formatted_val + "\n↑0,6691%"
         plt.text(bar.get_x() + bar.get_width()/2, yval + (max_price*0.02), label_text, ha='center', va='bottom', fontsize=9, color='#333')
     
@@ -165,7 +166,6 @@ def generate_chart(assets, prices):
     plt.savefig(chart_path, bbox_inches='tight', dpi=200, transparent=True)
     plt.close()
     return chart_path
-
 
 async def generate_pdf(news_text, chart_path):
     print("Gerando HTML e PDF...")
@@ -282,7 +282,8 @@ async def main():
     
     pdf_filename = await generate_pdf(news_text, chart_path)
     
-    chart_filename = f"chart_{datetime.datetime.now().strftime('%d_%m_%Y_%H%M%S')}.png"    # Rename chart to include date for upload
+    chart_filename = f"chart_{datetime.datetime.now().strftime('%d_%m_%Y_%H%M%S')}.png"
+    # Rename chart to include date for upload
     os.rename(chart_path, chart_filename)
     
     upload_ftp(pdf_filename, chart_filename)
