@@ -69,7 +69,7 @@ Escreva de forma profissional, direta e jornalística. Não use saudações.
             temperature=0.7
         )
         news_text = response.choices[0].message.content.strip()
-        
+        news_text = news_text.replace("Bolsa B4", "B4, Bolsa de Ação Climática")        
         title_prompt = f"Crie apenas o título principal (sem a data) para esta notícia em até 10 palavras. Notícia: {news_text}"
         title_resp = openai.ChatCompletion.create(
             model="gpt-4o-mini",
@@ -282,8 +282,7 @@ async def main():
     
     pdf_filename = await generate_pdf(news_text, chart_path)
     
-    chart_filename = f"chart_{datetime.datetime.now().strftime('%d_%m_%Y')}.png"
-    # Rename chart to include date for upload
+    chart_filename = f"chart_{datetime.datetime.now().strftime('%d_%m_%Y_%H%M%S')}.png"    # Rename chart to include date for upload
     os.rename(chart_path, chart_filename)
     
     upload_ftp(pdf_filename, chart_filename)
