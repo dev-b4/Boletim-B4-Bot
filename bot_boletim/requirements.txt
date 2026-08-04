@@ -1,8 +1,0 @@
-openai==0.28.0
-requests
-httpx
-feedparser
-beautifulsoup4
-jinja2
-matplotlib
-playwright
