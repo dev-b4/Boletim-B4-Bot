@@ -1,0 +1,9 @@
+openai==0.28.0
+requests
+beautifulsoup4
+playwright
+matplotlib
+jinja2
+pytz
+holidays
+feedparser
